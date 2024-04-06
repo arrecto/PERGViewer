@@ -16,7 +16,7 @@ participants_info = pd.read_csv('participants_info.csv')
 
 #read patient info
 def patient_info(file_name):
-    file_name = file_name[:-4]
+    file_name = file_name[-8:-4]
     details = participants_info[participants_info['id_record']==int(file_name)]
     return details
 
@@ -42,7 +42,7 @@ def patient_details(file_path, window, patient_index, samples):
     window['-AGE-'].update('Age: ' +str(details['age_years'][patient_index]))
     window['-SEX-'].update('Sex: '+ str(details['sex'][patient_index]))
     window['-SAMPLE-'].update('Samples: '+ str(samples))
-    window['-UNILATERAL-'].update('Samples: '+ str(details['unilateral'][patient_index]))
+    window['-UNILATERAL-'].update('Unilateral: '+ str(details['unilateral'][patient_index]))
     
 def plot_perg(df, ax, eye_side, time_column, color):
     idx = 0

@@ -6,7 +6,7 @@ import os
 patient_index = 0
 csv_files = []
 
-def read_perg(csv_files, patient_index, window):
+def read_perg(file, patient_index, window):
     global fig_agg1, fig_agg2, fig_agg3
     
     #if plot exists in the canvas
@@ -18,29 +18,30 @@ def read_perg(csv_files, patient_index, window):
         delete_fig_agg(fig_agg3, ax3)
     
     # Read the CSV file
-    df = pd.read_csv(csv_files[patient_index])
+    df = pd.read_csv(file)
 
     # Get the number of columns in the DataFrame
     num_columns = len(df.columns) // 3
     update_listbox(num_columns, window)
     #print patient_details in the side
-    patient_details(csv_files[patient_index], window, patient_index, num_columns)
-    
-    plot_csv_file(csv_files[patient_index], patient_index,0, 'RE_1', 'LE_1', fig1, ax1)
+    #patient_details(csv_files[patient_index], window, patient_index, num_columns)
+    patient_details(file, window, patient_index, num_columns)
+    #plot_csv_file(csv_files[patient_index], patient_index,0, 'RE_1', 'LE_1', fig1, ax1)
+    plot_csv_file(file, patient_index,0, 'RE_1', 'LE_1', fig1, ax1)
     fig_agg1 = draw_figure(window['-CANVAS1-'].TKCanvas, plt.gcf())
     window['-CANVAS1-'].update(visible=True)
     if num_columns == 1:
         window['-CANVAS2-'].update(visible=False)
         window['-CANVAS3-'].update(visible=False)
     if num_columns >= 2:
-        plot_csv_file(csv_files[patient_index], patient_index, 3, 'RE_2', 'LE_2', fig2, ax2)
+        plot_csv_file(file, patient_index, 3, 'RE_2', 'LE_2', fig2, ax2)
         fig_agg2 = draw_figure(window['-CANVAS2-'].TKCanvas, plt.gcf())
 
         window['-CANVAS2-'].update(visible=True)
         window['-CANVAS3-'].update(visible=False)
 
     if num_columns >= 3:
-        plot_csv_file(csv_files[patient_index], patient_index, 6, 'RE_3', 'LE_3', fig3, ax3)
+        plot_csv_file(file, patient_index, 6, 'RE_3', 'LE_3', fig3, ax3)
         fig_agg3 = draw_figure(window['-CANVAS3-'].TKCanvas, plt.gcf())
 
         window['-CANVAS3-'].update(visible=True)
@@ -79,7 +80,7 @@ layout2 = [
 
 layout =[[sg.Column(layout1), sg.Column(layout2), sg.Column([[sg.Text('Denoised signal')],[sg.Canvas(size=(300,300), key='-CANVASDENOISE-')]], visible=True)]]
 
-window = sg.Window("CSV Plot", layout, return_keyboard_events =True, resizable=True, element_justification='center')
+window = sg.Window("PERG Viewer", layout, return_keyboard_events =True, resizable=True, element_justification='center')
 
 
 while True:
@@ -93,42 +94,46 @@ while True:
 
         if folder_path:
             csv_files = get_csv_files_in_folder(folder_path)
+            file = folder_path+"/"+csv_files[patient_index]
             if patient_index >= len(csv_files):
                 break
 
-            read_perg(csv_files, patient_index, window)
+            read_perg(file, patient_index, window)
     elif event == 'Search':
         patient_index_input = values["-PATIENTINDEX-"]
         patient_index_input = patient_index_input.zfill(4) + ".csv" 
         if patient_index_input in csv_files:
            patient_index = csv_files.index(patient_index_input)
-           read_perg(csv_files, patient_index, window) 
+           file = folder_path+"/"+csv_files[patient_index]
+           read_perg(file, patient_index, window) 
         else:
             sg.popup_no_titlebar("The file does not exist!")         
     elif event=='Next':
         patient_index += 1
-        read_perg(csv_files, patient_index, window)
+        file = folder_path+"/"+csv_files[patient_index]
+        read_perg(file, patient_index, window)
     elif event=='Back':
         if patient_index !=0:
             patient_index -= 1
         else:
             sg.popup_no_titlebar("Cannot move further")
-        read_perg(csv_files, patient_index, window)
+        file = folder_path+"/"+csv_files[patient_index]
+        read_perg(file, patient_index, window)
     elif event=='Add':
         eye_side = values['-LIST-']
         if eye_side:  # Check if any option is selected
             eye_side = eye_side[0]  # Get the first selected option
 
-            details = patient_info(csv_files[patient_index])
+            details = patient_info(file)
             #id eye side
             id_eye = str(details["id_record"][patient_index])+eye_side
 
             #diagnosis
             diagnosis = details['diagnosis1'][patient_index]
 
-            df = pd.read_csv(csv_files[patient_index])
+            df = pd.read_csv(file)
             coeff = wt(df, eye_side)
-        else:
+        else: 
             sg.popup_no_titlebar("Please select eye side.")
         data_dict = read_perg_csv('data.csv', columns=['id_eye', 'diagnosis', 'coeff'])
         if id_eye in data_dict['id_eye'].to_numpy() and eye_side:
@@ -141,7 +146,7 @@ while True:
         if eye_side:  # Check if any option is selected
             eye_side = eye_side[0]  # Get the first selected option
 
-            details = patient_info(csv_files[patient_index])
+            details = patient_info(file)
             #id eye side
             id_eye = str(details["id_record"][patient_index])+eye_side
             data_dict = read_perg_csv('data.csv', columns=['id_eye', 'diagnosis', 'coeff'])
@@ -166,7 +171,7 @@ while True:
                 level_decomp = int(level_decomp_input)
             else:
                 level_decomp = 3
-            df = pd.read_csv(csv_files[patient_index])
+            df = pd.read_csv(file)
 
             time_label = pd.to_datetime(df.loc[:, 'TIME_'+eye_side[-1]], format='mixed')
 

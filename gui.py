@@ -43,6 +43,7 @@ def patient_details(file_path, window, patient_index, samples):
     window['-SEX-'].update('Sex: '+ str(details['sex'][patient_index]))
     window['-SAMPLE-'].update('Samples: '+ str(samples))
     window['-UNILATERAL-'].update('Unilateral: '+ str(details['unilateral'][patient_index]))
+    window['-REMARK-'].update('Remarks: '+ str(details['comments'][patient_index]))
     
 def plot_perg(df, ax, eye_side, time_column, color):
     idx = 0

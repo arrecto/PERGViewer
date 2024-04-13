@@ -62,7 +62,8 @@ layout_patient_info = [[sg.Text('ID Record:', key='-ID_RECORD-')],
                        [sg.Text('Age: ', key='-AGE-')],
                        [sg.Text('Sex: ', key='-SEX-')],
                        [sg.Text('Samples: ', key='-SAMPLE-')],
-                       [sg.Text('Unilateral: ', key='-UNILATERAL-')]]
+                       [sg.Text('Unilateral: ', key='-UNILATERAL-')],
+                       [sg.Text('Remarks: ', key='-REMARK-')]]
 
 layout1 = [[sg.Input(key="-PATIENTINDEX-", size=(5,1)), sg.Button("Search")],
            [sg.Frame('Patient Information', layout_patient_info)],
@@ -109,9 +110,12 @@ while True:
         else:
             sg.popup_no_titlebar("The file does not exist!")         
     elif event=='Next':
-        patient_index += 1
-        file = folder_path+"/"+csv_files[patient_index]
-        read_perg(file, patient_index, window)
+        if patient_index < len(csv_files)-2:
+            patient_index += 1
+            file = folder_path+"/"+csv_files[patient_index]
+            read_perg(file, patient_index, window)
+        else:
+            sg.popup_no_titlebar("End of the file.") 
     elif event=='Back':
         if patient_index !=0:
             patient_index -= 1
